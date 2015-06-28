@@ -11,3 +11,10 @@ sibling(X, Y) :- child_of(P, X), child_of(P, Y), X \= Y.
 
 human(X) :- male(X).
 human(X) :- female(X).
+
+young(andy).
+young(mary).
+
+boy(X) :- male(X), young(X).
+% :-(boy(X), (male(X), young(X)))
+

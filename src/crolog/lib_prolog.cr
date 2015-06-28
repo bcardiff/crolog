@@ -141,6 +141,13 @@ macro query(expr)
   end
 end
 
+macro translate_clause_to(dest, clause)
+  {% arg = clause.args.first %}
+  LibProlog.cons_functor(models_arg0, pred, {{"var_#{arg.name}".id}})
+  pred_body = LibProlog.new_functor(LibProlog.new_atom({{clause.name.stringify}}), 1)
+  LibProlog.cons_functor({{dest}}, pred_body, {{"var_#{arg.name}".id}})
+end
+
 macro rule(expr)
   assert_predicate = LibProlog.predicate("assert", 1, nil)
   assert_terms = LibProlog.new_term_refs(1)
@@ -157,20 +164,34 @@ macro rule(expr)
   {% end %}
 
   {% if expr.block %}
-  {% clause = expr.block.body %}
   models_pred = LibProlog.new_functor(LibProlog.new_atom(":-"), 2);
   models_args = LibProlog.new_term_refs(2)
 
   models_arg0 = models_args
   models_arg1 = ((models_args as UInt8*) + 1) as LibProlog::Term
 
+  {% if expr.block.body.is_a?(Expressions) %}
+    # multi clause block
+    block_clause = LibProlog.new_functor(LibProlog.new_atom(","), 2);
+    block_clause_args = LibProlog.new_term_refs(2)
+    block_clause_arg0 = block_clause_args
+    block_clause_arg1 = ((block_clause_args as UInt8*) + 1) as LibProlog::Term
+
+    translate_clause_to(block_clause_arg0, {{expr.block.body.expressions[0]}})
+    translate_clause_to(block_clause_arg1, {{expr.block.body.expressions[1]}})
+
+    LibProlog.cons_functor(models_arg1, block_clause, block_clause_arg0, block_clause_arg1)
+  {% end %}
+
+  {% if expr.block.body.is_a?(Call) %}
+    # single clause block
+    translate_clause_to(models_arg1, {{expr.block.body}})
+  {% end %}
 
   LibProlog.cons_functor(models_arg0, pred, {{"var_#{arg.name}".id}})
-
-  pred_body = LibProlog.new_functor(LibProlog.new_atom({{clause.name.stringify}}), 1);
-  LibProlog.cons_functor(models_arg1, pred_body, {{"var_#{clause.args.first.name}".id}})
-
   LibProlog.cons_functor(assert_terms, models_pred, models_arg0, models_arg1)
+
+
   {% else %}
   # rule is a fact
   LibProlog.cons_functor(assert_terms, pred, value)

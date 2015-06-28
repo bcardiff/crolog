@@ -12,8 +12,9 @@ Experiment on how swi-prolog can be embedded in crystal.
 
 ## Current limitations
 
+* Requires Crystal HEAD
 * Goals must be single predicate with variables or atoms. (crystal vars/symbols respectively).
-* Rules must be single clause and does not defines new vars.
+* Rules not defines new vars.
 
 ## Installation
 
