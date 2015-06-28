@@ -1,4 +1,4 @@
-@[Link("pl")]
+@[Link(ldflags: "-L/usr/local/Cellar/swi-prolog/7.2.0/libexec/lib/swipl-7.2.0/lib/x86_64-darwin13.4.0 -lswipl")]
 lib LibProlog
   type Module = Void*
   type Predicate = Void*
