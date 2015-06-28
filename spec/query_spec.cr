@@ -66,7 +66,7 @@ describe Crolog do
     a.should eq(["andy"])
   end
 
-  it "shoudl query multi vars rules" do
+  it "should query multi vars facts" do
     Crolog.load
 
     rule related(:foo, :bar)
@@ -74,6 +74,24 @@ describe Crolog do
     a = [] of {String,String}
     query related(x, y) do
       a << {x.string, y.string}
+    end
+
+    a.should eq([{"foo", "bar"}])
+  end
+
+
+  it "should define rule multi vars rules" do
+    Crolog.load
+
+    rule fact2(:foo, :bar)
+
+    rule related2(x, y) do
+      fact2(x, y) # TODO  if changed to fact2(y, x) it still works :-S
+    end
+
+    a = [] of {String,String}
+    query related2(j, k) do
+      a << {j.string, k.string}
     end
 
     a.should eq([{"foo", "bar"}])

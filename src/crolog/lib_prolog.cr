@@ -49,7 +49,7 @@ lib LibProlog
 
 
   fun put_atom_chars = PL_put_atom_chars(Term, CChar*) : CInt
-  # fun put_term = PL_put_term(Term, Term) : CInt
+  fun put_term = PL_put_term(Term, Term) : CInt
   # fun put_functor = PL_put_functor(Term, Functor) : CInt
 
   fun get_atom = PL_get_atom(Term, Atom*) : CInt
@@ -144,10 +144,18 @@ macro query(expr)
 end
 
 macro translate_clause_to(dest, clause)
-  {% arg = clause.args.first %}
-  LibProlog.cons_functor(models_arg0, pred, {{"var_#{arg.name}".id}})
-  pred_body = LibProlog.new_functor(LibProlog.new_atom({{clause.name.stringify}}), 1)
-  LibProlog.cons_functor({{dest}}, pred_body, {{"var_#{arg.name}".id}})
+  values = LibProlog.new_term_refs({{clause.args.length}})
+  {% for arg, index in clause.args %}
+    {% if arg.is_a?(Call) %}
+      LibProlog.put_term(term_n(values, {{index}}), {{"var_#{arg.name}".id}})
+    {% end %}
+    {% if arg.is_a?(SymbolLiteral) %}
+      LibProlog.put_atom_chars(term_n(values, {{index}}), {{arg.stringify[1..-1]}})
+    {% end %}
+  {% end %}
+
+  pred_body = LibProlog.new_functor(LibProlog.new_atom({{clause.name.stringify}}), {{clause.args.length}})
+  LibProlog.cons_functor_v({{dest}}, pred_body, values)
 end
 
 macro term_n(term, n)
@@ -159,8 +167,8 @@ macro rule(expr)
   assert_terms = LibProlog.new_term_refs(1)
 
   pred = LibProlog.new_functor(LibProlog.new_atom({{expr.name.stringify}}), {{expr.args.length}});
-  values = LibProlog.new_term_refs({{expr.args.length}})
 
+  values = LibProlog.new_term_refs({{expr.args.length}})
   {% for arg, index in expr.args %}
     {% if arg.is_a?(Call) %}
       {{"var_#{arg.name}".id}} = term_n(values, {{index}})
@@ -211,9 +219,8 @@ macro rule(expr)
     translate_clause_to(models_arg1, {{expr.block.body}})
   {% end %}
 
-  LibProlog.cons_functor(models_arg0, pred, {{"var_#{expr.args.first.name}".id}})
+  LibProlog.cons_functor_v(models_arg0, pred, values)
   LibProlog.cons_functor(assert_terms, models_pred, models_arg0, models_arg1)
-
 
   {% else %}
   # rule is a fact
