@@ -65,4 +65,17 @@ describe Crolog do
 
     a.should eq(["andy"])
   end
+
+  it "shoudl query multi vars rules" do
+    Crolog.load
+
+    rule related(:foo, :bar)
+
+    a = [] of {String,String}
+    query related(x, y) do
+      a << {x.string, y.string}
+    end
+
+    a.should eq([{"foo", "bar"}])
+  end
 end

@@ -42,7 +42,7 @@ lib LibProlog
 
   fun new_functor = PL_new_functor(Atom, arity : CInt) : Functor
   fun cons_functor = PL_cons_functor(Term, Functor, ...) : CInt
-  # fun cons_functor_v = PL_cons_functor_v(Term, Functor, Term) : CInt
+  fun cons_functor_v = PL_cons_functor_v(Term, Functor, Term) : CInt
 
   # PL_EXPORT(atom_t) PL_functor_name(functor_t f);
   # PL_EXPORT(int)    PL_functor_arity(functor_t f);
@@ -122,7 +122,7 @@ macro query(expr)
   predicate = LibProlog.predicate({{expr.name.stringify}}, {{expr.args.length}}, nil)
   terms = LibProlog.new_term_refs({{expr.args.length}})
   {% for arg, index in expr.args %}
-    {{"p#{index}".id}} = ((terms as UInt8*) + {{index}}) as LibProlog::Term
+    {{"p#{index}".id}} = term_n(terms, {{index}})
     {% if arg.is_a?(Call) %}
       # {{"p#{index}".id}} is a var due to new_term_refs
     {% end %}
@@ -150,27 +150,33 @@ macro translate_clause_to(dest, clause)
   LibProlog.cons_functor({{dest}}, pred_body, {{"var_#{arg.name}".id}})
 end
 
+macro term_n(term, n)
+  ((({{term}} as UInt8*) + {{n}}) as LibProlog::Term)
+end
+
 macro rule(expr)
   assert_predicate = LibProlog.predicate("assert", 1, nil)
   assert_terms = LibProlog.new_term_refs(1)
 
-  pred = LibProlog.new_functor(LibProlog.new_atom({{expr.name.stringify}}), 1);
+  pred = LibProlog.new_functor(LibProlog.new_atom({{expr.name.stringify}}), {{expr.args.length}});
+  values = LibProlog.new_term_refs({{expr.args.length}})
 
-  value = LibProlog.new_term_ref
-  {% arg = expr.args.first %}
-  {% if arg.is_a?(Call) %}
-    {{"var_#{arg.name}".id}} = value
+  {% for arg, index in expr.args %}
+    {% if arg.is_a?(Call) %}
+      {{"var_#{arg.name}".id}} = term_n(values, {{index}})
+    {% end %}
+    {% if arg.is_a?(SymbolLiteral) %}
+      LibProlog.put_atom_chars(term_n(values, {{index}}), {{arg.stringify[1..-1]}})
+    {% end %}
   {% end %}
-  {% if arg.is_a?(SymbolLiteral) %}
-  LibProlog.put_atom_chars(value, {{arg.stringify[1..-1]}})
-  {% end %}
+
 
   {% if expr.block %}
   models_pred = LibProlog.new_functor(LibProlog.new_atom(":-"), 2);
   models_args = LibProlog.new_term_refs(2)
 
-  models_arg0 = models_args
-  models_arg1 = ((models_args as UInt8*) + 1) as LibProlog::Term
+  models_arg0 = term_n(models_args, 0)
+  models_arg1 = term_n(models_args, 1)
 
   {% if expr.block.body.is_a?(Expressions) %}
     clauses_terms = LibProlog.new_term_refs(2)
@@ -183,7 +189,7 @@ macro rule(expr)
       {% if index == 0 %}
         translate_clause_to(clauses_terms, {{e}})
       {% else %}
-        second_clause_term = ((clauses_terms as UInt8*) + 1) as LibProlog::Term
+        second_clause_term = term_n(clauses_terms, 1)
         translate_clause_to(second_clause_term, {{e}})
 
         tuple_functor = LibProlog.new_functor(LibProlog.new_atom(","), 2);
@@ -205,13 +211,13 @@ macro rule(expr)
     translate_clause_to(models_arg1, {{expr.block.body}})
   {% end %}
 
-  LibProlog.cons_functor(models_arg0, pred, {{"var_#{arg.name}".id}})
+  LibProlog.cons_functor(models_arg0, pred, {{"var_#{expr.args.first.name}".id}})
   LibProlog.cons_functor(assert_terms, models_pred, models_arg0, models_arg1)
 
 
   {% else %}
   # rule is a fact
-  LibProlog.cons_functor(assert_terms, pred, value)
+  LibProlog.cons_functor_v(assert_terms, pred, values)
   {% end %}
 
   query = LibProlog.open_query(nil, LibProlog::PL_Q_NORMAL, assert_predicate, assert_terms)
