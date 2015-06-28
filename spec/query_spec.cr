@@ -17,7 +17,7 @@ describe Crolog do
     a.should eq(["john", "andy", "carl"])
   end
 
-  it "query" do
+  it "query with 2-clause rules" do
     Crolog.load
 
     rule male2(:john)
@@ -37,6 +37,29 @@ describe Crolog do
 
     a = [] of String
     query boy2(y) do
+      a << y.string
+    end
+
+    a.should eq(["andy"])
+  end
+
+  it "query with multi clause rules" do
+    Crolog.load
+
+    rule male3(:john)
+    rule male3(:andy)
+    rule young3(:john)
+    rule young3(:andy)
+    rule happy3(:andy)
+
+    rule boy3(y) do
+      male3(y)
+      young3(y)
+      happy3(y)
+    end
+
+    a = [] of String
+    query boy3(y) do
       a << y.string
     end
 

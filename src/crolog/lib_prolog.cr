@@ -42,13 +42,15 @@ lib LibProlog
 
   fun new_functor = PL_new_functor(Atom, arity : CInt) : Functor
   fun cons_functor = PL_cons_functor(Term, Functor, ...) : CInt
-  # PL_EXPORT(int)    PL_cons_functor_v(term_t h, functor_t fd, term_t a0) WUNUSED;
+  # fun cons_functor_v = PL_cons_functor_v(Term, Functor, Term) : CInt
 
   # PL_EXPORT(atom_t) PL_functor_name(functor_t f);
   # PL_EXPORT(int)    PL_functor_arity(functor_t f);
 
 
   fun put_atom_chars = PL_put_atom_chars(Term, CChar*) : CInt
+  # fun put_term = PL_put_term(Term, Term) : CInt
+  # fun put_functor = PL_put_functor(Term, Functor) : CInt
 
   fun get_atom = PL_get_atom(Term, Atom*) : CInt
 
@@ -171,16 +173,31 @@ macro rule(expr)
   models_arg1 = ((models_args as UInt8*) + 1) as LibProlog::Term
 
   {% if expr.block.body.is_a?(Expressions) %}
+    clauses_terms = LibProlog.new_term_refs(2)
+    first_clause_term = clauses_terms
+
+    clauses :: LibProlog::Term
+    new_clause :: LibProlog::Term
     # multi clause block
-    block_clause = LibProlog.new_functor(LibProlog.new_atom(","), 2);
-    block_clause_args = LibProlog.new_term_refs(2)
-    block_clause_arg0 = block_clause_args
-    block_clause_arg1 = ((block_clause_args as UInt8*) + 1) as LibProlog::Term
+    {% for e, index in expr.block.body.expressions %}
+      {% if index == 0 %}
+        translate_clause_to(clauses_terms, {{e}})
+      {% else %}
+        second_clause_term = ((clauses_terms as UInt8*) + 1) as LibProlog::Term
+        translate_clause_to(second_clause_term, {{e}})
 
-    translate_clause_to(block_clause_arg0, {{expr.block.body.expressions[0]}})
-    translate_clause_to(block_clause_arg1, {{expr.block.body.expressions[1]}})
+        tuple_functor = LibProlog.new_functor(LibProlog.new_atom(","), 2);
 
-    LibProlog.cons_functor(models_arg1, block_clause, block_clause_arg0, block_clause_arg1)
+        {% if index < expr.block.body.expressions.length - 1 %}
+          old_clauses_terms = clauses_terms
+          clauses_terms = LibProlog.new_term_refs(2)
+          first_clause_term = clauses_terms
+          LibProlog.cons_functor(first_clause_term, tuple_functor, old_clauses_terms, second_clause_term)
+        {% end %}
+      {% end %}
+    {% end %}
+
+    LibProlog.cons_functor(models_arg1, tuple_functor, first_clause_term, second_clause_term)
   {% end %}
 
   {% if expr.block.body.is_a?(Call) %}
