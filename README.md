@@ -17,6 +17,12 @@ Experiment on how swi-prolog can be embedded in crystal.
 
 ## Installation
 
+Install `swi-prolog`
+
+```
+brew info swi-prolog
+```
+
 Add it to `Projectfile`
 
 ```crystal
@@ -31,7 +37,7 @@ end
 require "crolog"
 ```
 
-TODO: Write usage here for library
+Check [Samples](https://github.com/bcardiff/crolog/tree/master/samples)
 
 ## Development
 
@@ -39,7 +45,7 @@ TODO: Write instructions for development
 
 ## Contributing
 
-1. Fork it ( https://github.com/[your-github-name]/crolog/fork )
+1. Fork it ( https://github.com/bcardiff/crolog/fork )
 2. Create your feature branch (git checkout -b my-new-feature)
 3. Commit your changes (git commit -am 'Add some feature')
 4. Push to the branch (git push origin my-new-feature)
