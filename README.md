@@ -20,7 +20,7 @@ Experiment on how swi-prolog can be embedded in crystal.
 Install `swi-prolog`
 
 ```
-brew info swi-prolog
+brew install swi-prolog
 ```
 
 Add it to `Projectfile`
