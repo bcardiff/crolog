@@ -86,7 +86,7 @@ describe Crolog do
     rule fact2(:foo, :bar)
 
     rule related2(x, y) do
-      fact2(x, y) # TODO  if changed to fact2(y, x) it still works :-S
+      fact2(y, x)
     end
 
     a = [] of {String,String}
@@ -94,6 +94,6 @@ describe Crolog do
       a << {j.string, k.string}
     end
 
-    a.should eq([{"foo", "bar"}])
+    a.should eq([{"bar", "foo"}])
   end
 end
