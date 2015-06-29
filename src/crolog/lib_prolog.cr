@@ -16,6 +16,9 @@ lib LibProlog
   PL_Q_CATCH_EXCEPTION = 0x08  # handle exceptions in C
   PL_Q_PASS_EXCEPTION = 0x10  # pass to parent environment
 
+  PL_ATOM = 2
+  PL_INTEGER = 3
+
   fun initialise = PL_initialise(CInt, CChar**) : CInt
   fun is_initialised = PL_is_initialised(CInt*, CChar***) : CInt
   fun top_level = PL_toplevel() : CInt
@@ -50,10 +53,16 @@ lib LibProlog
 
   fun put_atom_chars = PL_put_atom_chars(Term, CChar*) : CInt
   fun put_term = PL_put_term(Term, Term) : CInt
+  fun put_int64 = PL_put_int64(Term, Int64) : CInt
   # fun put_functor = PL_put_functor(Term, Functor) : CInt
 
   fun get_atom = PL_get_atom(Term, Atom*) : CInt
+  fun get_integer = PL_get_integer(Term, CInt*): CInt
+
+  fun term_type = PL_term_type(Term) : CInt
 
   fun is_atom = PL_is_atom(Term) : CInt
   fun is_variable = PL_is_variable(Term) : CInt
+  fun is_integer = PL_is_integer(Term) : CInt
+
 end

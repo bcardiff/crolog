@@ -96,4 +96,15 @@ describe Crolog do
 
     a.should eq([{"bar", "foo"}])
   end
+
+  it "should return ints" do
+    Crolog.load
+
+    a = [] of Int32
+    query between(1,4,x as Int32) do
+      a << x
+    end
+
+    a.should eq([1,2,3,4])
+  end
 end
