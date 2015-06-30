@@ -26,6 +26,10 @@ Install `swi-prolog`
 brew install swi-prolog
 ```
 
+Ensure `pkg-config --libs swipl` works. You might need to
+
+`export PKG_CONFIG_PATH=/usr/local/Cellar/swi-prolog/7.2.0/libexec/lib/pkgconfig`
+
 Add it to `Projectfile`
 
 ```crystal
