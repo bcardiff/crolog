@@ -1,5 +1,7 @@
 # crolog
 
+[![Build Status](https://travis-ci.org/bcardiff/crolog.svg)](https://travis-ci.org/bcardiff/crolog)
+
 Crystal meets Prolog
 
 Experiment on how swi-prolog can be embedded in crystal.
