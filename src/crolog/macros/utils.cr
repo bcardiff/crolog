@@ -3,10 +3,14 @@ macro translate_clause_to(dest, clause)
   {% for arg, index in clause.args %}
     {% if arg.is_a?(Call) %}
       LibProlog.put_term(term_n(%values, {{index}}), {{"var_#{arg.name}".id}})
-    {% end %}
-    {% if arg.is_a?(SymbolLiteral) %}
+    {% elsif arg.is_a?(SymbolLiteral) %}
       LibProlog.put_atom_chars(term_n(%values, {{index}}), {{arg.stringify[1..-1]}})
+    {% elsif arg.is_a?(NumberLiteral) %}
+      LibProlog.put_int64(term_n(%values, {{index}}), {{arg}}.to_i64)
+    {% else %}
+      {{ raise "not implemented" }}
     {% end %}
+
   {% end %}
 
   %pred_body = LibProlog.new_functor(LibProlog.new_atom({{clause.name.stringify}}), {{clause.args.length}})

@@ -8,9 +8,12 @@ macro rule(expr)
   {% for arg, index in expr.args %}
     {% if arg.is_a?(Call) %}
       {{"var_#{arg.name}".id}} = term_n(values, {{index}})
-    {% end %}
-    {% if arg.is_a?(SymbolLiteral) %}
+    {% elsif arg.is_a?(SymbolLiteral) %}
       LibProlog.put_atom_chars(term_n(values, {{index}}), {{arg.stringify[1..-1]}})
+    {% elsif arg.is_a?(NumberLiteral) %}
+      LibProlog.put_int64(term_n(values, {{index}}), {{arg}}.to_i64)
+    {% else %}
+      {{ raise "not implemented" }}
     {% end %}
   {% end %}
 

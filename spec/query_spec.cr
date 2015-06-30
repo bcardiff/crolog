@@ -107,4 +107,19 @@ describe Crolog do
 
     a.should eq([1,2,3,4])
   end
+
+  it "should yield ints" do
+    Crolog.load
+
+    rule between2(0, y) do
+      between(1,2,y)
+    end
+
+    a = [] of {Int32,Int32}
+    query between2(x as Int32, y as Int32) do
+      a << {x,y}
+    end
+
+    a.should eq([{0,1},{0,2}])
+  end
 end

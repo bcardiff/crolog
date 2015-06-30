@@ -14,7 +14,6 @@ macro query(expr)
     {% elsif arg.is_a?(NumberLiteral) %}
       LibProlog.put_int64({{"p#{index}".id}}, {{arg}}.to_i64)
     {% else %}
-      {{ puts arg.is_a?(Call) }}
       {{ raise "not implemented" }}
     {% end %}
   {% end %}
