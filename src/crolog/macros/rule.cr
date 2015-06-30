@@ -1,4 +1,7 @@
 macro rule(expr)
+  {% if expr.is_a?(Def) %}
+    export_rule({{expr}})
+  {% else %}
   assert_predicate = LibProlog.predicate("assert", 1, nil)
   assert_terms = LibProlog.new_term_refs(1)
 
@@ -69,4 +72,5 @@ macro rule(expr)
   query = LibProlog.open_query(nil, LibProlog::PL_Q_NORMAL, assert_predicate, assert_terms)
   LibProlog.next_solution(query)
   LibProlog.close_query(query)
+  {% end %}
 end

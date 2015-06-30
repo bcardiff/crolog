@@ -11,10 +11,19 @@ lib LibProlog
   alias CInt = Int32
   alias CChar = UInt8
 
+  alias PLFunction = Void*
+
   PL_Q_NORMAL = 0x02  # normal usage
   PL_Q_NODEBUG = 0x04  # use this one
   PL_Q_CATCH_EXCEPTION = 0x08  # handle exceptions in C
   PL_Q_PASS_EXCEPTION = 0x10  # pass to parent environment
+
+  PL_FA_NOTRACE = 0x01 # foreign cannot be traced
+  PL_FA_TRANSPARENT = 0x02 # foreign is module transparent
+  PL_FA_NONDETERMINISTIC = 0x04 # foreign is non-deterministic
+  PL_FA_VARARGS = 0x08 # call using t0, ac, ctx
+  PL_FA_CREF = 0x10 # Internal: has clause-reference
+  PL_FA_ISO = 0x20 # Internal: ISO core predicate
 
   PL_ATOM = 2
   PL_INTEGER = 3
@@ -64,5 +73,10 @@ lib LibProlog
   fun is_atom = PL_is_atom(Term) : CInt
   fun is_variable = PL_is_variable(Term) : CInt
   fun is_integer = PL_is_integer(Term) : CInt
+
+  fun unify_integer = PL_unify_integer(Term, CInt) : CInt
+
+
+  fun register_foreign = PL_register_foreign(name : CChar*, arity : CInt, f : PLFunction, flags : CInt) : CInt
 
 end
