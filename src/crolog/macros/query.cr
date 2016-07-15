@@ -1,6 +1,6 @@
 macro query(expr)
-  predicate = LibProlog.predicate({{expr.name.stringify}}, {{expr.args.length}}, nil)
-  terms = LibProlog.new_term_refs({{expr.args.length}})
+  predicate = LibProlog.predicate({{expr.name.stringify}}, {{expr.args.size}}, nil)
+  terms = LibProlog.new_term_refs({{expr.args.size}})
   {% for arg, index in expr.args %}
     {{"p#{index}".id}} = term_n(terms, {{index}})
     {% if arg.is_a?(Cast) %}
@@ -40,7 +40,7 @@ macro query(expr)
           {{var_name.id}} = Crolog::Atom.new({{"p#{index}".id}})
         {% elsif result_type == "Int32" %}
           raise "invalid result type" unless LibProlog.is_integer({{"p#{index}".id}}) == 1
-          {{var_name.id}} :: Int32
+
           LibProlog.get_integer({{"p#{index}".id}}, out {{var_name.id}})
         {% else %}
           {{ raise "not implemented" }}

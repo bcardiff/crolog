@@ -14,12 +14,12 @@ module Crolog
   end
 
   def self.print_initialization
-    argc :: LibProlog::CInt
-    argv :: Pointer(Pointer(LibProlog::CChar))
+    argc = uninitialized LibProlog::CInt
+    argv = uninitialized Pointer(Pointer(LibProlog::CChar))
     if LibProlog.is_initialised(out argc, out argv)
       puts "Crolog initialized"
       puts " arguments:"
-      0.to argc-1 do |i|
+      0.to argc - 1 do |i|
         puts "  #{String.new(argv[i])}"
       end
     end

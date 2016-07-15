@@ -14,7 +14,6 @@ Experiment on how swi-prolog can be embedded in crystal.
 
 ## Current limitations
 
-* Requires Crystal HEAD
 * Goals must be single predicate with variables or atoms. (crystal vars/symbols respectively).
 * Rules not defines new vars.
 
@@ -30,12 +29,12 @@ Ensure `pkg-config --libs swipl` works. You might need to
 
 `export PKG_CONFIG_PATH=/usr/local/Cellar/swi-prolog/7.2.0/libexec/lib/pkgconfig`
 
-Add it to `Projectfile`
+Add this to your application's `shard.yml`:
 
-```crystal
-deps do
-  github "bcardiff/crolog"
-end
+```yaml
+dependencies:
+  crolog:
+    github: bcardiff/crolog
 ```
 
 ## Usage

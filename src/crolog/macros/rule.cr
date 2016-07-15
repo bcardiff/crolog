@@ -5,9 +5,9 @@ macro rule(expr)
   assert_predicate = LibProlog.predicate("assert", 1, nil)
   assert_terms = LibProlog.new_term_refs(1)
 
-  pred = LibProlog.new_functor(LibProlog.new_atom({{expr.name.stringify}}), {{expr.args.length}});
+  pred = LibProlog.new_functor(LibProlog.new_atom({{expr.name.stringify}}), {{expr.args.size}});
 
-  values = LibProlog.new_term_refs({{expr.args.length}})
+  values = LibProlog.new_term_refs({{expr.args.size}})
   {% for arg, index in expr.args %}
     {% if arg.is_a?(Call) %}
       {{"var_#{arg.name}".id}} = term_n(values, {{index}})
@@ -32,8 +32,8 @@ macro rule(expr)
     clauses_terms = LibProlog.new_term_refs(2)
     first_clause_term = clauses_terms
 
-    clauses :: LibProlog::Term
-    new_clause :: LibProlog::Term
+    clauses = uninitialized LibProlog::Term
+    new_clause = uninitialized LibProlog::Term
     # multi clause block
     {% for e, index in expr.block.body.expressions %}
       {% if index == 0 %}
@@ -44,7 +44,7 @@ macro rule(expr)
 
         tuple_functor = LibProlog.new_functor(LibProlog.new_atom(","), 2);
 
-        {% if index < expr.block.body.expressions.length - 1 %}
+        {% if index < expr.block.body.expressions.size - 1 %}
           old_clauses_terms = clauses_terms
           clauses_terms = LibProlog.new_term_refs(2)
           first_clause_term = clauses_terms

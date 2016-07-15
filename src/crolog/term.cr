@@ -1,6 +1,6 @@
 module Crolog
   struct Term
-    def initialize(@inner)
+    def initialize(@inner : LibProlog::Term)
     end
 
     def unify(value : Int32)
@@ -9,7 +9,6 @@ module Crolog
 
     def int
       raise "term is not integer" unless LibProlog.is_integer(@inner)
-      res :: Int32
       LibProlog.get_integer(@inner, out res)
       res
     end

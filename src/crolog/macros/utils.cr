@@ -1,19 +1,21 @@
 macro translate_clause_to(dest, clause)
-  %values = LibProlog.new_term_refs({{clause.args.length}})
+  %values = LibProlog.new_term_refs({{clause.args.size}})
   {% for arg, index in clause.args %}
     {% if arg.is_a?(Call) %}
       LibProlog.put_term(term_n(%values, {{index}}), {{"var_#{arg.name}".id}})
+    {% elsif arg.is_a?(Var) %}
+      LibProlog.put_term(term_n(%values, {{index}}), {{"var_#{arg}".id}})
     {% elsif arg.is_a?(SymbolLiteral) %}
       LibProlog.put_atom_chars(term_n(%values, {{index}}), {{arg.stringify[1..-1]}})
     {% elsif arg.is_a?(NumberLiteral) %}
       LibProlog.put_int64(term_n(%values, {{index}}), {{arg}}.to_i64)
     {% else %}
-      {{ raise "not implemented" }}
+      {{ raise "not implemented #{arg.class}" }}
     {% end %}
 
   {% end %}
 
-  %pred_body = LibProlog.new_functor(LibProlog.new_atom({{clause.name.stringify}}), {{clause.args.length}})
+  %pred_body = LibProlog.new_functor(LibProlog.new_atom({{clause.name.stringify}}), {{clause.args.size}})
   LibProlog.cons_functor_v({{dest}}, %pred_body, %values)
 end
 

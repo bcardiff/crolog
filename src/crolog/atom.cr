@@ -2,7 +2,7 @@ require "./lib_prolog"
 
 module Crolog
   class Atom
-    @atom :: LibProlog::Atom
+    @atom : LibProlog::Atom
 
     def initialize(term)
       LibProlog.get_atom(term, out @atom)
